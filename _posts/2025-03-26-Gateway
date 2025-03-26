@@ -1,0 +1,123 @@
+---
+title: Gateway
+category: Cyber-Apocalypse-2025
+chall_description: 
+points: 0
+solves: 0
+tags: rev
+date: 2025-03-26
+comments: false
+---
+
+Couldn't find the official description so here's the "Synopsis": Gateway is a Hard reversing challenge. Players will reverse a 64-bit polyglot binary presented as an i386 statically linked ELF. Much of the flag checking logic is hidden away as 64-bit code, and execution is switched between compatiblity and 64-bit mode through the Heavensgate malware technique. Traditionally, Heavensgate is a Windows technique due to WoW64, but it can be applied in a limited way on Linux.
+
+---
+
+# Initial Analysis
+C (most likely), 32 bit, elf, no known packer, heavy control flow obfuscation preventing conventional decompilation. 
+# Understanding What This Does
+Because this binary is so hard to understand, instead of going through it to find the check function, I ran the binary in a debugger, paused the program (the program was waiting for stdin), and ran till return (check function starts at 0x08049D18 for those following at home). The first check encountered was:
+```
+cmp     dword ptr [ebp-1C0h], 21h
+```
+
+Looking at the data pointed to by `ebp-1c0` we find it to be the length of our input (including the newline), so the flag is 0x20 characters long.
+
+## Transformations
+The code following was a transformation, so our bytes went from:
+```
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+To:
+```
+\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92\x92'
+```
+What this transformation does is not important to our solution, but just be aware that every char encodes to a set char regardless of position.
+
+The next transformation is `call    near ptr sub_8049A9D`, what this does is it reorders the characters of our input, what transformations are, again, not important to our solution.
+
+The next transformation appears(?) to be a hashing or crc, regardless it does transformations character by character and produces 4 bytes from every 1 byte.
+## The Check
+Our input is finally checked with this code:
+```
+.text:08049EBF loc_8049EBF:
+.text:08049EBF movzx   ecx, byte ptr [ebp-1CDh] ; 1 = input has been correct to far, 0 = our input had at least one wrong character
+.text:08049EC6 mov     eax, [ebp-1C4h]          ; current char (also counter for while loop)
+.text:08049ECC mov     edx, [ebp+eax*4-19Ch]    ; access first array
+.text:08049ED3 mov     eax, [ebp-1C4h]          ; current char (also counter for while loop)
+.text:08049ED9 mov     eax, [ebp+eax*4-11Ch]    ; access second array
+.text:08049EE0 cmp     edx, eax                 ; are they equal?
+.text:08049EE2 setz    al                       ; set 1 if yes
+.text:08049EE5 movzx   eax, al
+.text:08049EE8 and     eax, ecx                 ; ecx contains wether or not our input has been correct so far ignorring the current character, so eax will store wether or not our input has been correct so far including the current character
+.text:08049EEA test    eax, eax                 ; 1 if correct so far, 0 if not
+.text:08049EEC setnz   al                       ; sets if correct so far
+.text:08049EEF mov     [ebp-1CDh], al           ; moves it into the "correct so far" variable
+.text:08049EF5 add     dword ptr [ebp-1C4h], 1  ; while loop +1
+.text:08049EFC loc_8049EFC:
+.text:08049EFC cmp     dword ptr [ebp-1C4h], 1Fh ; start here!
+.text:08049F03 jle     short loc_8049EBF         ; while loop
+```
+Essentially, `[ebp-1C4h]` will be 1 if our input is correct. 
+# The Solve
+You may have noticed that none of the transformations were position dependent, meaning we can just count the amount of times the arrays match each other in `.text:08049EE0 cmp     edx, eax`.
+With some help from llms, we get the following script:
+```python
+# --- Setup the breakpoint to count edx==eax at 0x08049EE0 ---
+set $hit_counter = 0
+break *0x08049EE0
+commands
+  silent
+  if ($edx == $eax)
+    set $hit_counter = $hit_counter + 1
+  end
+  continue
+end
+
+# --- Python block to brute force the input ---
+python
+import gdb
+import string
+import os
+
+input_length = 32          
+filler = "A"
+correct = ""
+
+def brute_force():
+    global correct
+    for pos in range(input_length):
+        found = False
+        for c in string.printable:
+            candidate = (correct + c).ljust(input_length, filler) + "\n"
+            with open("/tmp/candidate.txt", "w") as f:
+                f.write(candidate)
+
+            gdb.execute("set $hit_counter = 0", to_string=True)
+            gdb.execute("run < /tmp/candidate.txt > /dev/null", to_string=True)
+            hit = int(gdb.parse_and_eval("$hit_counter"))
+            if hit == pos + 1:
+                correct += c
+                gdb.write("Position {}: found character '{}'\n".format(pos, c))
+                found = True
+                break
+        if not found:
+            gdb.write("No candidate found for position {}\n".format(pos))
+            break
+    gdb.write("Final discovered string: {}\n".format(correct))
+
+brute_force()
+end
+```
+After running the script with `gdb -q -x bf.gdb --args ./Desktop/gateway` we get:
+```
+...
+[Inferior 1 (process 8428) exited normally]
+[Inferior 1 (process 8429) exited normally]
+[Inferior 1 (process 8430) exited normally]
+[Inferior 1 (process 8431) exited normally]
+[Inferior 1 (process 8432) exited normally]
+[Inferior 1 (process 8433) exited normally]
+Position 31: found character '}'
+Final discovered string: HTB{r3tf@r_t0_tH3_h3@V3n5g@t3!!}
+```
