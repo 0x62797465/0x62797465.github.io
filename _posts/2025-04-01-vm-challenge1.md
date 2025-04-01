@@ -284,7 +284,7 @@ So far we have:
 ```
 
 Now we can disassemble:
-```assembly
+```
 ; 00 = eax
 ; 01 = ecx
 ; 02 = edx
