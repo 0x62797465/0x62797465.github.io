@@ -1,6 +1,6 @@
 ---
 title: 
-category: UMD-CTF-2024
+category: 0x0539.net
 chall_description: 
 points: 500
 solves: 28
