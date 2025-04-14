@@ -1,11 +1,11 @@
 ---
 title: Sheriff Says
-category: 0x0539.net
+category: PlaidCTF
 chall_description: 
-points: 500
-solves: 28
+points: 156
+solves: 34
 tags: rev
-date: 2025-04-01
+date: 2025-05-04
 comments: false
 ---
 
