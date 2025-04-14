@@ -1,5 +1,5 @@
 ---
-title: 
+title: Sheriff Says
 category: 0x0539.net
 chall_description: 
 points: 500
