@@ -1,9 +1,9 @@
 ---
 title: Sheriff Says
-category: plaid
+category: PlaidCTF-2025
 chall_description: 
-points: 
-solves: 
+points: 156
+solves: 34
 tags: rev
 date: 2025-04-05
 comments: false
