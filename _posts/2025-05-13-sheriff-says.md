@@ -1,5 +1,5 @@
 ---
-title: 
+title: Sheriff Says
 category: PlaidCTF
 chall_description: 
 points: 156
