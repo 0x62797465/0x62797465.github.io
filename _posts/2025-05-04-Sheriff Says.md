@@ -2,8 +2,8 @@
 title: Sheriff Says
 category: plaid
 chall_description: 
-points:
-solves:
+points: 
+solves: 
 tags: rev
 date: 2025-05-04
 comments: false
