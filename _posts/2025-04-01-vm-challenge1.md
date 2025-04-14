@@ -8,7 +8,9 @@ tags: rev
 date: 2025-04-01
 comments: false
 ---
+
 This VM should keep my program safe... right?
+
 ---
 
 # Initial Overview 
