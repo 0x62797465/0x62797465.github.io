@@ -1,6 +1,6 @@
 ---
-title: Sheriff Says
-category: PlaidCTF
+title: Sheriff-Says
+category: PlaidCTF-2025
 chall_description: 
 points: 156
 solves: 34
@@ -413,4 +413,6 @@ ExecuteCommand response: {'jsonrpc': '2.0', 'method': 'window/showMessage', 'par
 Shutdown response: {'id': 6, 'result': None, 'jsonrpc': '2.0'}
 ```
 # Conclusion
-This was a golang LSP server with a custom command allowing for file reading under certain conditions. In order to bypass the filter disallowing the reading of the flag file we exploit a race condition and get the flag: `PCTF{sh3riFF_$4y$_y0uR_c0D3_1$_cL34N_dd323724983c}`
+This was a golang LSP server with a custom command allowing for file reading under certain conditions. In order to bypass the filter disallowing the reading of the flag file we exploit a race condition and get the flag: 
+
+ PCTF{sh3riFF_$4y$_y0uR_c0D3_1$_cL34N_dd323724983c}
