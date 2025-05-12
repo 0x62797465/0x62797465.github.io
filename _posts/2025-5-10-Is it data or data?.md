@@ -10,7 +10,7 @@ comments: false
 ---
 
 # Initial Analysis
-This is an ELF binary coded in C++, the main function contains a loop that, once exits, prints the flag.
+This is an ELF binary coded in C++, the main function contains a loop that, once it exits, prints the flag.
 ```c
   {
       char i;
@@ -102,7 +102,7 @@ It sets the current character to `g`. In the context of the main function, it ap
           rbx_2 += 1;
       }
 ```
-The first section is just a simple string input, it looks that both `var_208` and `var_228` can hold a copy of our input, but looking at cross references it looks like `var_228` is our input (it will be renamed from now on). 
+The first section is just a simple string input, it seems that both `var_208` and `var_228` can hold a copy of our input, but looking at cross references it looks like `var_228` is our input (it will be renamed from now on). 
 ```c
       if (sub_403b1f(__isoc23_strtol, "stoi", input, nullptr, 0xa)
           != 1)
@@ -254,7 +254,7 @@ This is just a backspace. The next function is:
       return string_for_comp_1;
   }
 ```
-This is similar to the first function we look at, it sets the current char to `f`. But this function, unlike the other, increments the `charptr`. The next function is:
+This is similar to the first function we looked at, it sets the current char to `f`. But this function, unlike the other, increments the `charptr`. The next function is:
 ```c
   void* sub_402cad()
 
@@ -318,7 +318,7 @@ while True:
             i -= 1
     cur_char += 1
 ```
-This looks pretty good, but it only gets to `ingagalaxyfarfaraway`. Why is there an extra g? Our initial analysis was **wrong**, the set_7th_char_g inserts g on the 7th mutation, not the 7th char! With a quick and dirty patch using the backspace character, we get:
+This looks pretty good, but it only gets to `ingagalaxyfarfaraway`. Why is there an extra `g`? Our initial analysis was **wrong**, the set_7th_char_g inserts g on the 7th mutation, not the 7th char! With a quick and dirty patch using the backspace character, we get:
 ```python
 base = ord('f')
 target = "inagalaxyfarfaraway"
