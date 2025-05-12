@@ -286,7 +286,7 @@ It adds 3 to the current char. Using these 2 functions, the function creating `f
 # Solve
 To recap:
 
-| Input | Affect                                                          |
+| Input | Effect                                                          |
 | ----- | --------------------------------------------------------------- |
 | 11    | sets the current_char-1 to t and doesn't increment the char ptr |
 | 13    | is similar to a backspace                                       |
