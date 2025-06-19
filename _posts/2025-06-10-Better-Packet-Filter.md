@@ -11,6 +11,10 @@ date: 2025-06-10
 comments: false
 ---
 
+The infra got closed as soon as the CTF was over, so there's no description :(
+
+---
+
 # Overview
 We are tasked with reverse engineering a kernel module and leaking the flag (placed at `/flag.txt`). We are given shell access to an Alpine image as a user and have to obtain a file read using the kernel module. The kernel module itself is compiled for aarch64 and is not stripped.
 # Initial Analysis
