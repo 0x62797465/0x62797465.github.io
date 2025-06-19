@@ -1,13 +1,13 @@
 ---
-title: Handoff
+title: Better Packet Filter
 author: bytebrew
 layout: writeup
-category: PicoCTF-2025
+category: USCG-2025
 chall_description:
 points: 400
 solves: 0
-tags: Binary-Exploitation
-date: 2025-03-09
+tags: rev
+date: 2025-06-10
 comments: false
 ---
 
