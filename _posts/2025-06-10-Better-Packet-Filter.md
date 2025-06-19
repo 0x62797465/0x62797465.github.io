@@ -310,9 +310,13 @@ This is great! But how do we turn this into bytecode? Since the VM is a large sw
 ```
 You may notice that 4 bytes are multiplied by the program counter in order to obtain the current instruction, leading to the assumption that each instruction is 32 bits. Going back to the VM, we can find out the following information:
 
-| 0-7 bits    | 8-11 bits       | 12-15 bits | 16-32 bits       |
-| ----------- | --------------- | ---------- | ---------------- |
-| instruction | destination reg | source reg | source immediate |
+| Bits        | Field            |
+|-------------|------------------|
+| 0–7         | Instruction       |
+| 8–11        | Destination Reg   |
+| 12–15       | Source Reg        |
+| 16–31       | Source Immediate  |
+
 Going back to our intended program, we can craft the following:
 ```c
 47 0 0 y // load packet at offset y into r0
