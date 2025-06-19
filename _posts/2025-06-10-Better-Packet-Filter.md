@@ -4,7 +4,7 @@ author: bytebrew
 layout: writeup
 category: USCG-2025
 chall_description:
-points: 400
+points: 500
 solves: 0
 tags: rev
 date: 2025-06-10
