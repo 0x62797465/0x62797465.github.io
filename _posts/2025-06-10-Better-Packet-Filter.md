@@ -1,7 +1,5 @@
 ---
 title: Better Packet Filter
-author: bytebrew
-layout: writeup
 category: USCG-2025
 chall_description:
 points: 500
