@@ -312,10 +312,10 @@ You may notice that 4 bytes are multiplied by the program counter in order to ob
 
 | Bits        | Field            |
 |-------------|------------------|
-| 0–7         | Instruction       |
-| 8–11        | Destination Reg   |
-| 12–15       | Source Reg        |
-| 16–31       | Source Immediate  |
+| 1–8         | Instruction       |
+| 9–12        | Destination Reg   |
+| 13–16       | Source Reg        |
+| 17–32       | Source Immediate  |
 
 Going back to our intended program, we can craft the following:
 ```c
