@@ -9,6 +9,10 @@ date: 2025-5-10
 comments: false
 ---
 
+This challenge required me to construct a sequence of instructions that produces a target output.  
+
+---
+
 # Initial Analysis
 This is an ELF binary coded in C++, the main function contains a loop that, once it exits, prints the flag.
 ```c
@@ -57,7 +61,7 @@ In order to understand our goal, we need to understand what the check_string fun
       return rax;
   }
 ```
-Most of this is just noise, what you really need to know is that `data_4062a0` must equal `data_4062c0`. If we cross reference both of them we can see `data_4062c0` being set in the `INIT` function to "inagalaxyfarfaraway". The other string is set by many functions, most of which are in the mutate function.
+Most of this is just noise; what you really need to know is that `data_4062a0` must equal `data_4062c0`. If we cross reference both of them we can see `data_4062c0` being set in the `INIT` function to "inagalaxyfarfaraway". The other string is set by many functions, most of which are in the mutate function.
 # Analysis
 Before we analyze the input function let's take a brief look at the set of the 7th char to g:
 ```c
