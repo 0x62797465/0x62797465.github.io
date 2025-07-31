@@ -110,7 +110,7 @@ The setup is as follows:
                              // adding on later	
   ... 
 ```
-All this does is load the cause of the fault into `a0` aka `result` and executes different instructions based on it. A load fault leads to it being 5, a store fault causes it to be 7. It also loads the faulting address into `a3`. Then a decoding step is done: `(105 * (_A3 ^ 0x420)) & 0xFFF`. The argument is also loaded via `result = *(&a9 + ((v43 >> 20) & 0x1FLL))`. Here is an example:
+All this does is load the cause of the fault into `a0` aka `result`, and executes different instructions based on it. A load fault causes it to be 5, and a store fault causes it to be 7. It also loads the faulting address into `a3`. Then a decoding step is done: `(105 * (_A3 ^ 0x420)) & 0xFFF`. The argument is also loaded via `result = *(&a9 + ((v43 >> 20) & 0x1FLL))`. Here is an example:
 ```
 [-0x22d].q = 1
 ```
@@ -124,7 +124,7 @@ This is a write to `-0x22d` or `0xfffffffffffffdd3`. `(105 * (0xfffffffffffffdd3
           return result;
         }
 ```
-So `[-0x22d].q = 1` is `push 1`. The VM itself executes certain instructions under mode 7 which only operate on one piece of the stack. So:
+So `[-0x22d].q = 1` is `push 1`. The VM itself executes certain instructions under mode 7, which only operate on one piece of the stack. So:
 ```c
           if ( v46 == 1401 )
           {
@@ -132,7 +132,7 @@ So `[-0x22d].q = 1` is `push 1`. The VM itself executes certain instructions und
             return result;
           }
 ```
-Does an `or` operation on the top of the stack. Other instructions in this mode include `puts`, `push`, `xor`, `loop` (initialization), `cryptographic stuff`, `add`, `mul`, and `rol`. The `loop` instruction is used as followed:
+Does an `or` operation on the top of the stack. Other instructions in this mode include `puts`, `push`, `xor`, `loop` (initialization), `cryptographic stuff`, `add`, `mul`, and `rol`. The `loop` instruction is used as follows:
 ```
 loop 5
 ...
@@ -149,7 +149,7 @@ So the code in between the instructions gets executed 6 times (not 5). The secon
         return result;
       }
 ```
-`pop`'s both 8 byte values off the stack, `or`'s the values and stores the result in a register (usually `a4`). Other instructions include `xor`, `add`, `mul`, `rol`, `pop`, `getchar`, and `loop`.
+`pop`'s both 8-byte values off the stack, `or`'s the values and stores the result in a register (usually `a4`). Other instructions include `xor`, `add`, `mul`, `rol`, `pop`, `getchar`, and `loop`.
 # Child Analysis - Disassembly and Hurdles
 The child looks as follows:
 ```
@@ -160,7 +160,7 @@ The child looks as follows:
    4 @ 80100044  int64_t a4 = [-0x22c].q
    5 @ 8010004c  if (a4 != 2) then 6 else 7
 ```
-Clearly, we need a disassembler to work on top of this one. Analyzing the disassembly itself would be hard, because the format changes when computing the address to write to/read from. Thankfully, as shown above, Binary Ninja's MLIL (medium level intermediate language) works perfectly. The script I used extracts the addresses read from/written to, computes the obfuscation thing (`(105 * (x ^ 0x420)) & 0xFFF`), uses a lookup table, and comments the mnemonic along with the argument. So our old code becomes:
+We need a disassembler to work on top of this one. Analyzing the disassembly itself would be hard because the format changes when computing the address to write to/read from. Thankfully, as shown above, Binary Ninja's MLIL (medium-level intermediate language) works perfectly. The script I used extracts the addresses read from/written to, computes the obfuscation thing (`(105 * (x ^ 0x420)) & 0xFFF`), uses a lookup table, and comments the mnemonic along with the argument. So our old code becomes:
 ```
    0 @ 80100004  int64_t var_8 = s0
    1 @ 80100018  [0x421].q = "What is the flag?"  // puts 0x80101000
@@ -169,14 +169,14 @@ Clearly, we need a disassembler to work on top of this one. Analyzing the disass
    4 @ 80100044  int64_t a4 = [-0x22c].q  // pop a4 
    5 @ 8010004c  if (a4 != 2) then 6 else 7
 ```
-There is one more hurdle we have to get through. Things like this happens:
+There is one more hurdle we have to get through. Things like this happen:
 ```
   16 @ 8010007c  int64_t var_18_1 = 0
   17 @ 80100088  [0x657].q = 0xf  // ctrl b3 15
   18 @ 80100094  int64_t a4_2 = arg9
   19 @ 80100098  [-0x22c].q = a4_2  // push a4_2
 ```
-`arg9` is a mystery value, how is it assigned? Well `var_18` is `sp-0x18` and `arg9` is `sp+0xffe8`. You may notice that `0x10000-0x18=0xffe8`, somehow `arg9` and `var_18` are the same. 
+`arg9` is a mystery value. How is it assigned? Well, `var_18` is `sp-0x18` and `arg9` is `sp+0xffe8`. You may notice that `0x10000-0x18=0xffe8`, somehow `arg9` and `var_18` are the same. 
 # Child Analysis - Manual Analysis
 The code starts with:
 ```
@@ -279,7 +279,7 @@ What `crypto` does exactly will be revealed later. Next up is this huge function
  116 @ 80100490  int64_t a4_23 = arg5
  ...
 ```
-This is really complex, and manual analysis took a while. So here is the python version:
+This is really complex, and manual analysis took a while. So here is the Python version:
 ```python
 def rotate_left(val,valer):
     val &= 0xFFFFFFFFFFFFFFFF  # Ensure 64-bit
@@ -311,7 +311,7 @@ input_1 = temp_5
 
 print(hex(input_1)
 ```
-This is just one round, and we do not know how `0xfcfcfcdcdcdccccc` and `0xccbcbcbcacacac9c` are derived. To improve understanding, debugging of the VM can be used. For this I manually set up a gdb script to break on VM instructions and logged the arguments. This led me to derive an initial state that gets overwritten, and also that the bytes used to overwrite the initial state are derived from the cryptographic function. Finally, we have a working reproduction of the original code:
+This is just one round, and we do not know how `0xfcfcfcdcdcdccccc` and `0xccbcbcbcacacac9c` are derived. To improve understanding, debugging of the VM can be used. For this, I manually set up a GDB script to break on VM instructions and logged the arguments. This led me to derive an initial state that gets overwritten, and also that the bytes used to overwrite the initial state are derived from the cryptographic function. Finally, we have a working reproduction of the original code:
 ```python
 def transform_byte(input_byte):
     input_byte &= 0xFF
@@ -399,6 +399,268 @@ while True:
         break
 print(hex(input[0]))
 ```
-At this point, the CTF ended. All that was left to do was to reverse engineer the next function (which was smaller and had similar functionality) and transcribe them into z3 constraints, the first function needed `input[0]` to equal `0x37fbe21eae04066a` at the end. 
+At this point, the CTF ended. All that was left to do was to reverse engineer the next function (which was smaller and had similar functionality) and transcribe them into z3 constraints; the first function needed `input[0]` to equal `0x37fbe21eae04066a` at the end. 
 # Conclusion
 While disappointed that I was not able to finish this challenge, I was very close. The analysis files involved are [here](https://mega.nz/file/CQ0CwQia#r0rVZODBylDJYG9oZIJ0IDk8z17cPWiaLzfpFPDiRYY). 
+# Update
+I decided to finish this challenge. First, I disassembled the function by hand:
+```python
+counter = 8
+loop twice b2
+loop five times b3
+push counter
+mul counter
+rol stack values # takes our input off the stack
+push result
+counter+=1
+xor 0x9e3779b97f4a7c15
+pop input_1
+pop input_2 # takes input off the stack
+push input_2
+push 1
+push input_2
+push -1
+xor stack values
+push result
+add stack values
+push result
+add input_1
+xor stack values
+push result
+xor input_2
+end b3
+```
+Decompiled (excluding the loop) it looks like:
+```python
+def rotate_left(val,valer):
+    val &= 0xFFFFFFFFFFFFFFFF  # Ensure 64-bit
+    while valer:
+        val = ((val << 1) | (val >> 63)) & 0xFFFFFFFFFFFFFFFF
+        valer-=1
+    return val
+
+
+counter = 8
+input_1 = 0x3945394b3a483340
+input_2 = 0x77743b3052563a39
+#while True:
+if True:
+    temp = counter*counter
+    input_1 = rotate_left(input_top, temp) ^ 0x9e3779b97f4a7c15
+    input_2 = input_next
+    counter+=1
+    temp_2 = (((input_2 ^ 0xffffffffffffffff) + 1 + input_1) & 0xffffffffffffffff)
+    input_top = temp_2
+    #if (counter == 13):
+    #   break
+print(input_top)
+```
+To get the input on the stack, we can go back to the cryptographic function:
+```c
+          *off_80006018 = result ^ 0x29;        // cryptographic function
+          *off_80006020 = result - 82;
+          v71 = (16 * result) | (result >> 4);
+          result = result ^ (*off_80006020 - *off_80006018);
+          *off_80006028 = result;
+          *off_80006030 = v71;
+          off_80006018 = (off_80006018 + 1);
+          off_80006020 = (off_80006020 - 1);
+          off_80006028 = (off_80006028 + 1);
+          off_80006030 = (off_80006030 - 1);
+          return result;
+```
+Those addresses store other addresses:
+```
+.data:0000000080006018 off_80006018:   .dword unk_800060A0     # DATA XREF: VM:loc_80000D94↑o
+.data:0000000080006018                                         # VM+BDC↑r ...
+.data:0000000080006020 off_80006020:   .dword unk_800060DF     # DATA XREF: VM+BEC↑r
+.data:0000000080006020                                         # VM+BFC↑r ...
+.data:0000000080006028 off_80006028:   .dword unk_800060E0     # DATA XREF: VM+C04↑r
+.data:0000000080006028                                         # VM+C34↑r ...
+.data:0000000080006030 off_80006030:   .dword unk_8000611F     # DATA XREF: VM+C24↑r
+.data:0000000080006030                                         # VM+C38↑r ...
+```
+Reproducing this in Python, we can get the state for any given input:
+```python
+for i in input:
+    i = (-ord(i)) & 0xFF
+    state[0xA0 + offset] = i ^ 0x29
+    state[0xDF - offset] = (i - 0x52) & 0xFF
+    state[0x11F - offset] = ((i << 4) | (i >> 4)) & 0xFF
+    state[0xE0 + offset] = i ^ ((i - 0x52) & 0xFF)
+    offset += 1
+```
+Using the logger, we can determine where in the state our code begins. Taking into account the other loop, this is our final decompilation:
+```python
+
+# Flatten input_2 into a byte array (little-endian)
+def ror(val, r_bits):
+    return ((val >> r_bits) | (val << (8 - r_bits))) & 0xFF
+
+def make_qwords(state):
+    qwords = []
+    for i in range(0, len(state), 8):
+        chunk = state[i:i+8]
+        if len(chunk) < 8:
+            chunk += [0] * (8 - len(chunk))
+        # Little endian conversion
+        qword = 0
+        for j in range(8):
+            qword |= (chunk[j] & 0xFF) << (8 * j)
+        qwords.append(qword)
+    return qwords
+
+offset = 0
+state = [0] * 0x200
+
+# Input text to encode
+asdasd = input("Enter your string: ")
+for i in asdasd:
+    i = (-ord(i)) & 0xFF
+    state[0xA0 + offset] = i ^ 0x29
+    state[0xDF - offset] = (i - 0x52) & 0xFF
+    state[0x11F - offset] = ((i << 4) | (i >> 4)) & 0xFF
+    state[0xE0 + offset] = i ^ ((i - 0x52) & 0xFF)
+    offset += 1
+
+# Generate QWORDs
+qwords = make_qwords(state)
+
+new_input_2 = qwords[::-1]
+new_input_2 = new_input_2[36:]
+def rotate_left(val,valer):
+    val &= 0xFFFFFFFFFFFFFFFF  # Ensure 64-bit
+    while valer:
+        val = ((val << 1) | (val >> 63)) & 0xFFFFFFFFFFFFFFFF
+        valer-=1
+    return val
+
+counter = 8
+i = 0
+
+input_2 = new_input_2
+while True:
+    temp = counter*counter
+    input_1_temp = rotate_left(input_2[i], temp) ^ 0x9e3779b97f4a7c15
+    input_2_temp = input_2[i+1]
+    counter+=1
+
+    temp_2 = (((input_2_temp ^ 0xffffffffffffffff) + 1 + input_1_temp) & 0xffffffffffffffff)
+    input_2[i+1] = temp_2
+    i += 1
+    if (counter == 13):
+        print(hex(input_2[i])) # must equal 0x796dcf410f11057
+    if (counter == 15):
+       break 
+print(hex(input_2[i])) # must equal 0x5f36d6201c352a7a
+
+```
+Transcribing this to z3, we get:
+```python
+from z3 import *
+
+payload_len = 32
+target_input0 = 0x37fbe21eae04066a
+target_input2_5 = BitVecVal(0x0796dcf410f11057, 64)
+target_input2_7 = BitVecVal(0x5f36d6201c352a7a, 64)
+
+# Create symbolic payload
+char_vars = [BitVec(f'c_{i}', 8) for i in range(payload_len)]
+known_prefix = b"uiuctf{"
+known_suffix = b"}"
+
+solver = Solver()
+solver.add([char_vars[i] == known_prefix[i] for i in range(len(known_prefix))])
+solver.add(char_vars[-1] == known_suffix[0])
+solver.add([And(c >= 0x20, c <= 0x7e)
+            for i, c in enumerate(char_vars)
+            if i >= len(known_prefix) and i < payload_len - 1])
+
+input_bytes = [((-c) & 0xFF) for c in char_vars]
+
+# -------- Pipeline 1 (input0 rolling hash) --------
+def transform_byte_sym(b):
+    stored_18 = b ^ 0x29
+    stored_20 = (b - 0x52) & 0xFF
+    v71 = ((b << 4) | LShR(b, 4)) & 0xFF
+    diff = (stored_20 - stored_18) & 0xFF
+    final_result = b ^ diff
+    return v71, final_result
+
+byte_array = [BitVecVal(0, 8) for _ in range(64)]
+for i in range(payload_len):
+    v71, final_result = transform_byte_sym(input_bytes[i])
+    byte_array[i] = v71
+    byte_array[63 - i] = final_result
+
+input_vals = [Concat(*byte_array[i*8:(i+1)*8]) for i in range(8)]
+
+def rotate_left64(val, shift):
+    return RotateLeft(val, shift % 64)
+
+input0 = input_vals[0]
+for counter in range(1, 8):
+    temp = counter * counter
+    rolled = rotate_left64(input0, temp) ^ 0x9e3779b97f4a7c15
+    iv = input_vals[counter]
+
+    temp_3 = 3 + (rolled ^ iv)
+    temp_4 = ((~rolled) | (~iv)) * 3 & 0xFFFFFFFFFFFFFFFF
+    temp_5 = (temp_4 + temp_3) & 0xFFFFFFFFFFFFFFFF
+    temp_6 = ((~rolled) | (~iv))
+    temp_6 = ((temp_6 ^ 0xFFFFFFFFFFFFFFFF) * 5) & 0xFFFFFFFFFFFFFFFF
+    input0 = (temp_5 + temp_6) & 0xFFFFFFFFFFFFFFFF
+
+solver.add(input0 == target_input0)
+
+# -------- Pipeline 2 (input_2 rolling modification) --------
+state = [BitVecVal(0, 8) for _ in range(0x200)]
+for offset in range(payload_len):
+    b = input_bytes[offset]
+    state[0xA0 + offset] = b ^ 0x29
+    state[0xDF - offset] = (b - 0x52) & 0xFF
+    state[0x11F - offset] = ((b << 4) | LShR(b, 4)) & 0xFF
+    state[0xE0 + offset] = b ^ ((b - 0x52) & 0xFF)
+
+def make_qwords(state):
+    qwords = []
+    for i in range(0, len(state), 8):
+        qword = BitVecVal(0, 64)
+        for j in range(8):
+            qword |= ZeroExt(56, state[i + j]) << (8 * j)
+        qwords.append(qword)
+    return qwords
+
+input_2 = make_qwords(state)[::-1][36:]  # 64 total → input_2[0..27]
+
+# Perform 7 transformations (counter from 8 to 14)
+counter = 8
+for i in range(7):  # i from 0 to 6
+    shift = counter * counter
+    rotated = RotateLeft(input_2[i], shift % 64)
+    xored = rotated ^ BitVecVal(0x9e3779b97f4a7c15, 64)
+    input_2[i+1] = ((~input_2[i+1] + 1 + xored) & 0xFFFFFFFFFFFFFFFF)
+    counter += 1
+
+# Add constraints:
+solver.add(input_2[5] == target_input2_5)
+solver.add(input_2[7] == target_input2_7)
+
+# Solve
+if solver.check() == sat:
+    m = solver.model()
+    result = ''.join(chr(m[c].as_long()) for c in char_vars)
+    print("[+] Found payload:", result)
+else:
+    print("[-] No solution found.")
+```
+# Flag
+```
+h@DESKTOP-TH1NKC3 ~> time python solve.py
+[+] Found payload: uiuctf{M3m0Ry_M4ppED_SysTEmca11}
+
+________________________________________________________
+Executed in  141.44 secs    fish           external
+   usr time  140.75 secs   23.42 millis  140.73 secs
+   sys time    0.09 secs    9.78 millis    0.08 secs
+```
