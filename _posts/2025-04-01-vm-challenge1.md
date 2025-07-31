@@ -9,7 +9,7 @@ date: 2025-04-01
 comments: false
 ---
 
-This VM should keep my program safe... right?
+This challenge is a classic VM. In this writeup I manually disassemble bytecode and analyze it. 
 
 ---
 
@@ -41,7 +41,7 @@ First thing we have to do is find the VM function, bytecode, and target (what pr
 00401000    }
 
 ```
-So arg2 has to be one, I would go farther to find out what needs to be set, but when we disassemble the bytecode it will be pretty obvious. 
+So arg2 has to be one. I would go further to find out what needs to be set, but when we disassemble the bytecode, it will be pretty obvious. 
 
 The VM function is pretty easy to find, just look for a function that has a bunch of branches based of a single byte (0x004012b5). 
 
