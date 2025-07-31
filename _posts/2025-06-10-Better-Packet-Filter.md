@@ -9,7 +9,7 @@ date: 2025-06-10
 comments: false
 ---
 
-The infra got closed as soon as the CTF was over, so there's no description :(
+Better Packet Filter is an arm64 kernel module that runs a custom VM with a user-supplied program to filter "packets" that are placed in a file. In this writeup, I analyze the VM and construct a program that leaks bits from `/flag.txt`.
 
 ---
 
