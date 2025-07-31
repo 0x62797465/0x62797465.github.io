@@ -9,7 +9,7 @@ date: 2025-04-05
 comments: false
 ---
 
-The Sheriff steps into the square, hand twitchin’ near his holster, eyes locked on your repo. He’s seen the warnings---and he don’t take kindly to 'em. Fire up your IDE, fix what’s broken, and make damn sure your code don’t flinch… 'cause justice don’t wait, and neither does he.
+This is a Golang LSP server that we have to reverse engineer in order to find commands that allow us to read the flag. Due to protections the flag can not be directly read, but a race condition can be used as a bypass.
 
 ---
 
@@ -48,7 +48,7 @@ Skipping fix tracking - empty text
 [DEBUG] scheduleDiagnosticsUpdate for file:///home/h/Downloads/wow.go: version=6, isDirty=true, lastGood="\n", text="\n"
 Publishing 0 diagnostics for file:///home/h/Downloads/wow.go
 ```
-It appears to be an LSP server, let's take a look at it.
+It appears to be an LSP server. Let's take a look at it.
 # Initial Analysis
 Once we open this in IDA, we are dropped into main, which contains network and mutex stuff. Browsing the main functions, we can see a `main__ptr_Server_Handle` function with a weird string: `security restriction: cannot access files with 'flag' in the name`. Scrolling up we see the string `Command: %s with %d arguments\n` which appears to be for the LSP server:
 ```c
