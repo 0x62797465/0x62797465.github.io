@@ -9,7 +9,7 @@ date: 2024-03-25
 comments: false
 ---
 
-Did you know that the mov instruction in x86 is Turing complete :D?
+In this writeup I analyze a movfuscated binary that takes no input and gives no output, using diffing and tracing the flag is obtained.
 
 ---
 
