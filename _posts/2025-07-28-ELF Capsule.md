@@ -9,7 +9,7 @@ date: 2025-07-28
 comments: false
 ---
 
-This was a riscv64 kernel with a VM from UIUCTF. I almost solved it, but the CTF ended before I had the chance to finish. 
+In this writeup I analyze a riscv64 kernel that contains a VM and a process executed in userland. This process utilizes invalid reads/writes in order to trigger the VM. I construct a disassembler and instruction logger, disassemble the userland program's VM calls, decompile the checks to python, and transcribe them into z3 constraints. 
 
 ---
 
