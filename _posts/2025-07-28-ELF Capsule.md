@@ -13,7 +13,7 @@ In this writeup I analyze a riscv64 kernel that contains a VM and a process exec
 
 ---
 
-# Kernel Analysis
+## Kernel Analysis
 This is a riscv64 kernel that executes a child process which contains the actual challenge. The entry point is as follows:
 ```c
 li              t0, -1
@@ -78,7 +78,7 @@ This makes `a0` the stack pointer, and `a1` the address the code returns to. In 
    └───────────┤VM │  
                └───┘  
 ```
-## VM Analysis
+### VM Analysis
 The setup is as follows:
 ```c
   __asm { csrr            a0, scause }          // cause of fault, 5 or 7
@@ -150,7 +150,8 @@ So the code in between the instructions gets executed 6 times (not 5). The secon
       }
 ```
 `pop`'s both 8-byte values off the stack, `or`'s the values and stores the result in a register (usually `a4`). Other instructions include `xor`, `add`, `mul`, `rol`, `pop`, `getchar`, and `loop`.
-# Child Analysis - Disassembly and Hurdles
+## Child Analysis
+### Disassembly and Hurdles
 The child looks as follows:
 ```
    0 @ 80100004  int64_t var_8 = s0
@@ -177,7 +178,7 @@ There is one more hurdle we have to get through. Things like this happen:
   19 @ 80100098  [-0x22c].q = a4_2  // push a4_2
 ```
 `arg9` is a mystery value. How is it assigned? Well, `var_18` is `sp-0x18` and `arg9` is `sp+0xffe8`. You may notice that `0x10000-0x18=0xffe8`, somehow `arg9` and `var_18` are the same. 
-# Child Analysis - Manual Analysis
+### Manual Analysis
 The code starts with:
 ```
    0 @ 80100004  int64_t var_8 = s0
@@ -400,9 +401,9 @@ while True:
 print(hex(input[0]))
 ```
 At this point, the CTF ended. All that was left to do was to reverse engineer the next function (which was smaller and had similar functionality) and transcribe them into z3 constraints; the first function needed `input[0]` to equal `0x37fbe21eae04066a` at the end. 
-# Conclusion
+## Conclusion
 While disappointed that I was not able to finish this challenge, I was very close. The analysis files involved are [here](https://mega.nz/file/CQ0CwQia#r0rVZODBylDJYG9oZIJ0IDk8z17cPWiaLzfpFPDiRYY). 
-# Update
+## Update
 I decided to finish this challenge. First, I disassembled the function by hand:
 ```python
 counter = 8
@@ -654,7 +655,7 @@ if solver.check() == sat:
 else:
     print("[-] No solution found.")
 ```
-# Flag
+## Solve
 ```
 h@DESKTOP-TH1NKC3 ~> time python solve.py
 [+] Found payload: uiuctf{M3m0Ry_M4ppED_SysTEmca11}
