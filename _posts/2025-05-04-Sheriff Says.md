@@ -13,7 +13,7 @@ This is a Golang LSP server that we have to reverse engineer in order to find co
 
 ---
 
-# Overview
+## Overview
 The README.md says:
 ```
 Use Neovim
@@ -49,7 +49,7 @@ Skipping fix tracking - empty text
 Publishing 0 diagnostics for file:///home/h/Downloads/wow.go
 ```
 It appears to be an LSP server. Let's take a look at it.
-# Initial Analysis
+## Initial Analysis
 Once we open this in IDA, we are dropped into main, which contains network and mutex stuff. Browsing the main functions, we can see a `main__ptr_Server_Handle` function with a weird string: `security restriction: cannot access files with 'flag' in the name`. Scrolling up we see the string `Command: %s with %d arguments\n` which appears to be for the LSP server:
 ```c
       v187 = "Command: %s with %d arguments\n";
@@ -201,7 +201,7 @@ To summarize: this reads a file under specific conditions given it does not cont
 - Able to accept multiple connections at once
 - Large time delay, allowing us to overwrite a variable
  
-# Crafting a Working File Read
+## Crafting a Working File Read
 Claude+flocto did this part, essentially you fix a file and upload your own config. That sets `UseFileSystem` to `True`.
  
 ```python
@@ -389,7 +389,7 @@ if __name__ == "__main__":
  
 I am skipping over some stuff here, but the code is self explanatory. 
  
-# Exploitation
+## Exploitation
 Exploitation was as easy as running two versions of the above code twice, once with a normal file (/etc/passwd works) and one with "flag". You run the one containing flag first, setting the error and triggering the delay, then you run the other file. File one (ran slightly after):
  
 ```sh
@@ -420,7 +420,7 @@ ExecuteCommand response: {'jsonrpc': '2.0', 'method': 'window/showMessage', 'par
 {'id': 5, 'result': "🤠 Howdy partner! That's some mighty fine syntax you got there!\n\nYour line:\n> PCTF{sh3riFF_$4y$_y0uR_c0D3_1$_cL34N_dd323724983c}", 'jsonrpc': '2.0'}
 Shutdown response: {'id': 6, 'result': None, 'jsonrpc': '2.0'}
 ```
-# Conclusion
+## Conclusion
 This was a golang LSP server with a custom command allowing for file reading under certain conditions. In order to bypass the filter disallowing the reading of the flag file we exploit a race condition and get the flag: 
 
  PCTF{sh3riFF_$4y$_y0uR_c0D3_1$_cL34N_dd323724983c}
