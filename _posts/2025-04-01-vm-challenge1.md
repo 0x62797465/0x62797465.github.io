@@ -9,14 +9,14 @@ date: 2025-04-01
 comments: false
 ---
 
-This challenge is a classic VM. In this writeup I manually disassemble bytecode and analyze it. 
+This challenge is a classic VM with an anti-debug feature. In this writeup I manually disassemble bytecode and analyze it. 
 
 ---
 
-# Initial Overview 
+## Initial Overview 
 VM exe coded in C, takes an arg which is a 32 bit integer which is the password, prints the flag if correct, prints nothing if not. 
-# Analysis
-## Initial Analysis
+## Analysis
+### Initial Analysis
 First thing we have to do is find the VM function, bytecode, and target (what prints the flag). For the target, we see:
 ```c
 00401000    void __fastcall sub_401000(int32_t arg1, int32_t arg2)
@@ -62,7 +62,7 @@ So what is in "i"?
 3e020000003f01370104400101013d003e16c31f483f003901003f003b03034101033b03034301363ec9a505ae3f033700033ef09bacb43f033b00033e70d4eaf23f013edf310e813f033b01030000000000000000000000000000000000000000000000000000000000000000000000003b03034100014301363e010000003f03360000
 ```
 Looks like good old bytecode!
-## VM analysis
+### VM analysis
 The first byte comparison we see is:
 ```c
 004012dd            if (bytecode == 0x36)
@@ -72,7 +72,7 @@ The first byte comparison we see is:
 004012dd            }
 ```
 This terminates the loop, so we can assume that 0x36 is the opcode for halt/exit/ret (has no functions so it might as well be). 
-
+ 
 The second comparison we see is:
 ```c
 004012e9            if (bytecode >= 0x37 && bytecode <= 0x3c)
@@ -265,7 +265,7 @@ Finally, we make it to the end:
 ```
 This uses the flag set by cmp in order to jump ahead a few bytes. 0x42 looks like a jmp (always set), 0x43 looks like jz, and 0x44 looks like jnz.
 
-# Disassembling
+## Disassembling
 So far we have:
 ```
 0x36 = hlt
@@ -328,7 +328,7 @@ push 0x1 ; 3e01000000 ; win?
 pop esi ; 3f03
 hlt ; 36
 ```
-# Assembly Analysis
+## Assembly Analysis
 The first section:
 ```
 push 2 ; 3e02000000
@@ -383,5 +383,5 @@ print(ecx)
 We get `1944380847`, now that we know that value, we can find out input. The equation can be represented as `1944380847 = (eax + 0xae05a5c9) ^ 0xb4ac9bf0` let's simplify by xoring each side: `3343416927 = (eax + 0xae05a5c9)` next lets subtract each side: 423811222 = eax.
 
 With that, we have our input.
-# Flag
+## Flag
 FLAG{0x4a516025f931857b}
