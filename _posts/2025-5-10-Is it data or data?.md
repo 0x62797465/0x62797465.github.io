@@ -9,12 +9,12 @@ date: 2025-5-10
 comments: false
 ---
 
-This challenge required me to construct a sequence of instructions that produces a target output.  
+This challenge requires a sequence of instructions that produces a target output.  
 
 ---
 
-# Initial Analysis
-This is an ELF binary coded in C++, the main function contains a loop that, once it exits, prints the flag.
+## Initial Analysis
+This is an x86-64 ELF coded in C++. The main function contains a loop that prints the flag once the loop is broken.
 ```c
   {
       char i;
@@ -37,7 +37,7 @@ This is an ELF binary coded in C++, the main function contains a loop that, once
       /* no return */
   }
 ```
-In order to understand our goal, we need to understand what the check_string function does:
+In order to understand our goal, we need to understand what the `check_string` function does:
 ```c
   int64_t check_string()
 
@@ -61,8 +61,8 @@ In order to understand our goal, we need to understand what the check_string fun
       return rax;
   }
 ```
-Most of this is just noise; what you really need to know is that `data_4062a0` must equal `data_4062c0`. If we cross reference both of them we can see `data_4062c0` being set in the `INIT` function to "inagalaxyfarfaraway". The other string is set by many functions, most of which are in the mutate function.
-# Analysis
+Most of this is just noise; the key detail is that `data_4062a0` must equal `data_4062c0`. If we cross reference both of them we can see `data_4062c0` being set in the `INIT` function to "inagalaxyfarfaraway". The other string is set by many functions, most of which are in the `mutate` function.
+## Analysis
 Before we analyze the input function let's take a brief look at the set of the 7th char to g:
 ```c
   {
@@ -87,7 +87,7 @@ Before we analyze the input function let's take a brief look at the set of the 7
       return 1;
   }
 ```
-It sets the current character to `g`. In the context of the main function, it appears to set the 7th char after the input function runs 7th time and returns 1 each time. Based off this the conclusion can be made that this will set the 7th char to `g` (which we will find to be incorrect later on). Now, let's analyze the input function:
+This function sets the current character to `g`. In the context of the main function, it appears to set the 7th char after the input function runs 7th time and returns 1 each time. Based off this the conclusion can be made that this will set the 7th char to `g` (which we will find to be incorrect later on). Now, let's analyze the input function:
 ```c
       while (true)
       {
@@ -185,7 +185,7 @@ The first section is just a simple string input, it seems that both `var_208` an
       }
 ```
 So, it looks like the code executes different functions based off what number we input, let's take a look at each.
-## Analysis of Mutations
+### Analysis of Mutations
 The first function is:
 ```c
   int64_t sub_402bb1()
@@ -287,7 +287,7 @@ This is pretty simple, it just subtracts one from the current char (if set to `t
   }
 ```
 It adds 3 to the current char. Using these 2 functions, the function creating `f`, and the backspace function, any string can be created.
-# Solve
+## Solve
 To recap:
 
 | Input | Effect                                                          |
