@@ -13,9 +13,9 @@ Better Packet Filter is an arm64 kernel module that runs a custom VM with a user
 
 ---
 
-# Overview
+## Overview
 We are tasked with reverse engineering a kernel module and leaking the flag (placed at `/flag.txt`). We are given shell access to an Alpine image as a user and have to obtain a file read using the kernel module. The kernel module itself is compiled for aarch64 and is not stripped.
-# Initial Analysis
+## Initial Analysis
 The init_module function is as follows:
 ```c
 int __cdecl init_module()
@@ -43,7 +43,7 @@ __int64 __fastcall device_ioctl(file *_f, unsigned int cmd, program *arg)
 }
 ```
 So we need to call ioctl with a file descriptor and either `0x40086601` (for `set_program`) or `0x40086602` (for `should_drop`) and an additional argument to pass to either of the functions.
-# Analysis of `set_program`
+## Analysis of `set_program`
 This is a large function, but most of it is error handling, so I'll only show key parts:
 ```c
 __int64 __fastcall set_program(program *user_program)
@@ -102,7 +102,7 @@ LABEL_12:
   ...
 ```
 All this does is set the global data containing the `current_program` to the user-supplied bytes. But what is the `current_program` for? Looking at cross references we can see it is used in `should_drop` a lot, the other function we can call. Let's analyze that.
-# Analysis of `should_drop`
+## Analysis of `should_drop`
 The function itself looks pretty simple:
 ```c
 __int64 __fastcall should_drop(char *a1)
@@ -235,7 +235,7 @@ LABEL_8:
 }
 ```
 This runs a VM that is supplied with the data from the user-supplied file. The bytecode for the VM itself can be traced back to the call `execute_filter(dest, 0x100uLL, (__int64)current_program.code, current_program.len);` confirming that `set_program` allows us to set our own bytecode.
-# VM Analysis
+## VM Analysis
 There is somewhere around 50 instructions. To save some space on this already code-filled writeup I will just review the few that I used:
 ```c
     case operation::OP_LDR_IMM:
@@ -277,7 +277,7 @@ This allows us to branch to an absolute address based on the result of the compa
       return 1;
 ```
 These are the two most simple instructions, they allow us to return either a `1` or a `0` to the user. This is crucial for giving information to the user. 
-# Bytecode Construction
+## Bytecode Construction
 So here is what we have: `ldr`, `and`,  `cmp`, `bne`, `accept`, and `drop`. In order to leak information, we can do the following:
 1. Load the 2 bytes from offset `y` from `/flag.txt`
 2. Perform the `and` operation with the 2 bytes and `x`
