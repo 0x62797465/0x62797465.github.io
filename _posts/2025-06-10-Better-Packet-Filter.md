@@ -282,10 +282,11 @@ So here is what we have: `ldr`, `and`,  `cmp`, `bne`, `accept`, and `drop`. In o
 1. Load the 2 bytes from offset `y` from `/flag.txt`
 2. Perform the `and` operation with the 2 bytes and `x`
 3. Compare the 2 bytes (after the `and` operation) and `x`
-4. If they are equal, we return 1
-5. If they are not, we return 2
+4. If they are equal, we return 0
+5. If they are not, we return 1
 6. Repeat 1-5 doubling `x` until it reaches `65536`, then we set to 0 and move on to 7
 7. Repeat, adding 2 to `y` until an error occurs (meaning we have leaked everything)
+ 
 This is great! But how do we turn this into bytecode? Since the VM is a large switch statement, we can (correctly) assume that the switch number for each instruction is the instruction byte. Next we can review the VM loop:
 ```c
   while ( pc < v5 )
