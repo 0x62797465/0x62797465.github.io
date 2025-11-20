@@ -1,5 +1,5 @@
 ---
-title: Fare Evasion
+title: Easy Shellcoding
 category: Amateurs-2025
 tags: pwn
 date: 2025-11-18
