@@ -66,6 +66,7 @@ Since partial jumps, self-modifying shellcode, putting shellcode on the stack, a
 1. Set up arguments
 2. Switch to 64-bit mode
 3. Run syscall
+  
 To prevent the validator from marking any of the instructions as invalid/not allowed, I utilized `movabs`, which has an rex prefix that encodes to `dec ecx` on 32-bit and the rest encodes to a smaller mov. But since the smaller mov is 32-bit, the extra bytes are also disassembled, so a second mov hides the syscall instruction. 
 # Solve
 Thanks to `c-bass` for fixing the bugs (the setup of the syscall) in my shellcode after I had to leave. The first part of the shellcode is as follows:
