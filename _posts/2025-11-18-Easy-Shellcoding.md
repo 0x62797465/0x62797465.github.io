@@ -60,11 +60,11 @@ with open("/tmp/solve.elf", "wb+") as fp:
 os.chmod("/tmp/solve.elf", 0o777)
 os.execl("/tmp/solve.elf", "/tmp/solve.elf")
 ```
-This code takes hex shellcode, disassembles it as x86 (32 bit), checks the instructions against a whitelist and makes sure that jumps are to existing code (this prevents partial jumps which would allow us to bypass the whitelist). The protections include no RWX sections, NX bit, no relo/PIE. 
+Despite its size, the challenge only had 5 solves. This code takes hex shellcode, disassembles it as x86 (32-bit), checks the instructions against a whitelist, and makes sure that jumps are to existing code (this prevents partial jumps, which would allow us to bypass the whitelist). The protections include no RWX sections, NX bit, and no relo/PIE. 
 # Idea
-Since partial jumps, self modifying shellcode, putting shellcode on the stack, and jumps to registers are all protected against, and the binary executes itself as 32 bit, I was out of ideas. Luckily I remembered that Heaven's Gate works on Linux, due to a previous challenge I did (Gateway). This works by running `ljmp 0x33:<address>`, which switches to 64-bit mode from 32-bit mode, with 0x33 being the 64-bit code segment selector in the Linux GDT. Due to this, the solve is as follows:
+Since partial jumps, self-modifying shellcode, putting shellcode on the stack, and jumps to registers are all protected against, and the binary executes itself as 32 bit, I was out of ideas. Luckily, I remembered that Heaven's Gate works on Linux, due to a previous challenge I did (Gateway). This works by running `ljmp 0x33:<address>`, which switches to 64-bit mode from 32-bit mode, with 0x33 being the 64-bit code segment selector in the Linux GDT. Due to this, the solution is as follows:
 1. Set up arguments
-2. Switch to 64 bit mode
+2. Switch to 64-bit mode
 3. Run syscall
 To prevent the validator from marking any of the instructions as invalid/not allowed, I utilized `movabs`, which has an rex prefix that encodes to `dec ecx` on 32-bit and the rest encodes to a smaller mov. But since the smaller mov is 32-bit, the extra bytes are also disassembled, so a second mov hides the syscall instruction. 
 # Solve
@@ -90,7 +90,7 @@ b8 11108967  mov eax, 0x67891011 ; 32-bit mov
 45                  inc ebp ; part of mov data
 b8 0f050f05    mov eax, 0x50f050f ; part of mov data and the syscall
 ```
-But in reality it executes:
+But in reality, it executes:
 ```
 49 b8 1110896745b80f05 movabs  r8, 0x50fb84567891011 ; r8 is not needed for the syscall
 0f 05                               syscall
